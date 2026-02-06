@@ -8,13 +8,20 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import HourglassBottom from '@mui/icons-material/HourglassBottom';
 
 const StatusChip = ({ status }) => (
-  <Chip label={status || 'En proceso'} color={status === 'Completed' ? 'success' : 'warning'} size="small" />
+  <Chip
+    label={status || 'En proceso'}
+    color={status === 'Completed' ? 'success' : 'warning'}
+    size="small"
+    icon={status === 'Completed' ? <CheckCircleOutline /> : <HourglassBottom />}
+  />
 );
 
 const DashboardTable = ({ rows }) => (
-  <TableContainer component={Paper}>
+  <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
     <Table size="small">
       <TableHead>
         <TableRow>
@@ -29,7 +36,14 @@ const DashboardTable = ({ rows }) => (
       </TableHead>
       <TableBody>
         {rows.map((row) => (
-          <TableRow key={row.machine}>
+          <TableRow
+            key={row.machine}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(0, 174, 239, 0.06)'
+              }
+            }}
+          >
             <TableCell>{row.machine}</TableCell>
             <TableCell>
               <StatusChip status={row.shifts.E1} />

@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const Submission = require('../models/Submission');
 const { calculateMinutes } = require('../utils/time');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
@@ -28,14 +29,33 @@ router.post(
     const { machineId, workerName, shift, startedAt, finishedAt, checklist, incidentDescription, hasIncident } =
       req.body;
 
-    if (!machineId || !workerName || !shift || !startedAt || !finishedAt) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    const errors = [];
+    if (!machineId) errors.push("Campo 'Maquina' requerido");
+    if (!workerName) errors.push("Campo 'Nombre del trabajador' requerido");
+    if (!shift) errors.push("Campo 'Turno' requerido");
+    if (shift && !['E1', 'E2', 'E3', 'E4'].includes(shift)) {
+      errors.push("Turno invalido");
+    }
+    if (!startedAt) errors.push("Campo 'Inicio' requerido");
+    if (!finishedAt) errors.push("Campo 'Fin' requerido");
+
+    const startDate = startedAt ? new Date(startedAt) : null;
+    const endDate = finishedAt ? new Date(finishedAt) : null;
+    if (startDate && endDate && endDate <= startDate) {
+      errors.push('La hora de fin debe ser mayor que la hora de inicio');
     }
 
-    const beforePhotoUrl = req.files?.beforePhoto?.[0]?.path || '';
-    if (!beforePhotoUrl) {
-      return res.status(400).json({ message: 'Before photo is required' });
+    const beforePhotoFile = req.files?.beforePhoto?.[0];
+    if (!beforePhotoFile) {
+      errors.push("Foto 'Antes' requerida");
     }
+
+    if (errors.length) {
+      logger.warn('Submit failed validation', { errors });
+      return res.status(400).json({ success: false, errors });
+    }
+
+    const beforePhotoUrl = beforePhotoFile?.path || '';
 
     const afterPhotoUrl = req.files?.afterPhoto?.[0]?.path || '';
     const incidentPhotoUrl = req.files?.incidentPhoto?.[0]?.path || '';
@@ -64,6 +84,7 @@ router.post(
       req.app.get('io').emit('submission:created', submission);
     }
 
+    logger.info('Submission created', { submissionId: submission._id.toString() });
     return res.status(201).json(submission);
   }
 );

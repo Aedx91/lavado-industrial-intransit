@@ -39,8 +39,8 @@ const ChecklistStepper = ({ onChange }) => {
 
   return (
     <Box sx={{ display: 'grid', gap: 2 }}>
-      <Typography variant="subtitle1">Checklist</Typography>
-      <Stepper orientation="vertical" nonLinear>
+      <Typography variant="subtitle1">Checklist operativo</Typography>
+      <Stepper orientation="vertical" nonLinear sx={{ bgcolor: 'rgba(0, 51, 102, 0.02)', p: 2, borderRadius: 2 }}>
         {steps.map((step) => {
           const startIndex = offset;
           offset += step.items.length;

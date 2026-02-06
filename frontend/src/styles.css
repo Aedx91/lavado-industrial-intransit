@@ -1,5 +1,7 @@
 body {
   margin: 0;
-  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
-  background-color: #f6f8fb;
+  font-family: 'Sora', 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top left, rgba(0, 174, 239, 0.15), transparent 45%),
+    radial-gradient(circle at 20% 70%, rgba(0, 51, 102, 0.12), transparent 40%),
+    #f5f8fa;
 }
