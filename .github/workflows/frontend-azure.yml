@@ -25,8 +25,8 @@ jobs:
       - name: Install and build
         working-directory: frontend
         env:
-          VITE_API_URL: https://ca-lavadoindustrial-api.lemonmeadow-c2f631ac.eastus.azurecontainerapps.io/api
-          VITE_API_SOCKET: https://ca-lavadoindustrial-api.lemonmeadow-c2f631ac.eastus.azurecontainerapps.io
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_SOCKET: ${{ secrets.VITE_API_SOCKET }}
         run: |
           npm ci
           npm run build
