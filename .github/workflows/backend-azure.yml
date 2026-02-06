@@ -1,4 +1,4 @@
-name: Deploy Backend to Azure App Service
+name: Deploy Backend to Azure Container Instance
 
 on:
   push:
@@ -11,27 +11,45 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      RESOURCE_GROUP: rg-lavadoindustrial-alpha
+      ACI_NAME: cg-lavadoindustrial-ifch
+      ACI_DNS_LABEL: api-lavadoindustrial-ifch
+      IMAGE_NAME: lavadoindustrial-backend:alpha
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          node-version: "20.x"
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install dependencies
-        working-directory: backend
-        run: npm ci
+      - name: Build and push image
+        run: az acr build --registry ${{ secrets.ACR_NAME }} --image $IMAGE_NAME ./backend
 
-      - name: Archive backend
-        working-directory: backend
-        run: zip -r ../backend.zip .
-
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.AZURE_BACKEND_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
-          package: backend.zip
+      - name: Deploy container
+        shell: bash
+        run: |
+          set -e
+          ACR_USER=$(az acr credential show --name ${{ secrets.ACR_NAME }} --query username -o tsv)
+          ACR_PASS=$(az acr credential show --name ${{ secrets.ACR_NAME }} --query "passwords[0].value" -o tsv)
+          az container delete --name $ACI_NAME --resource-group $RESOURCE_GROUP --yes || true
+          az container create \
+            --resource-group $RESOURCE_GROUP \
+            --name $ACI_NAME \
+            --image ${{ secrets.ACR_NAME }}.azurecr.io/$IMAGE_NAME \
+            --os-type Linux \
+            --cpu 1 --memory 1.5 \
+            --dns-name-label $ACI_DNS_LABEL \
+            --ports 4000 \
+            --registry-login-server ${{ secrets.ACR_NAME }}.azurecr.io \
+            --registry-username $ACR_USER \
+            --registry-password $ACR_PASS \
+            --environment-variables \
+              MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+              JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}" \
+              UPLOAD_DIR=uploads \
+              PORT=4000

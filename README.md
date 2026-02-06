@@ -30,16 +30,15 @@ Sistema web para digitalizar el proceso de lavado industrial con formularios mó
 ## Deploy en Azure (Alpha)
 Flujo sugerido: VS Code → GitHub → GitHub Actions → Azure.
 
-### Backend (App Service)
-1. Crear App Service (Linux, Node 20).
-2. Configurar variables de entorno en App Service:
+### Backend (Azure Container Instance + ACR)
+1. Crear Azure Container Registry (ACR) y habilitar admin.
+2. Crear Azure Container Instance (ACI) con la imagen del backend.
+3. En GitHub, agregar secretos:
+   - AZURE_CREDENTIALS
+   - ACR_NAME
    - MONGODB_URI
    - JWT_SECRET
    - CORS_ORIGIN (URL del frontend en Azure)
-   - UPLOAD_DIR=uploads
-3. En GitHub, agregar secretos:
-   - AZURE_BACKEND_APP_NAME
-   - AZURE_BACKEND_PUBLISH_PROFILE
 
 ### Frontend (Static Web Apps)
 1. Crear Static Web App.
