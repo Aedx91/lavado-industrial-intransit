@@ -1,0 +1,37 @@
+name: Deploy Backend to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-azure.yml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Archive backend
+        working-directory: backend
+        run: zip -r ../backend.zip .
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_BACKEND_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: backend.zip
