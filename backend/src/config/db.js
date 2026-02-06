@@ -34,7 +34,9 @@ const connectDb = async () => {
 
   uri = uri.replace(/`/g, '');
 
-  uri = ensureQueryParam(uri, 'ssl', 'true');
+  if (String(process.env.USE_SSL).toLowerCase() === 'true') {
+    uri = ensureQueryParam(uri, 'ssl', 'true');
+  }
   uri = ensureQueryParam(uri, 'retrywrites', 'false');
   uri = ensureAppName(uri);
 
