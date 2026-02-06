@@ -35,6 +35,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/machines', require('./routes/machines'));
 app.use('/api/submissions', require('./routes/submissions'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/test-db', require('./routes/testDb'));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

@@ -67,8 +67,13 @@ const FormPage = () => {
       setStatusMessage('Checklist enviado correctamente.');
     } catch (error) {
       const apiErrors = error?.response?.data?.errors;
+      const apiMessage = error?.response?.data?.message;
       if (Array.isArray(apiErrors) && apiErrors.length) {
         setErrorMessages(apiErrors);
+      } else if (apiMessage) {
+        setErrorMessages([apiMessage]);
+      } else if (error?.message) {
+        setErrorMessages([`Error de red: ${error.message}`]);
       } else {
         setStatusMessage('No se pudo enviar el checklist. Verifique los campos.');
       }
